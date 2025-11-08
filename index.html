@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>One-Page Event Registration</title>
+  <style>
+    /* 1. Base Styling and Layout */
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #eef3f7;
+        color: #34495e;
+        line-height: 1.6;
+    }
+
+    .container {
+        max-width: 600px;
+        margin: 60px auto;
+        padding: 30px;
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        min-height: 400px;
+    }
+
+    h1 {
+        text-align: center;
+        color: #0056b3; /* Primary Blue */
+        margin-bottom: 30px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+    }
+    
+    /* 2. Header and Navigation */
+    header {
+        background-color: #0056b3;
+        padding: 15px 0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    nav {
+        display: flex;
+        justify-content: center;
+        gap: 25px;
+        flex-wrap: wrap;
+    }
+
+    nav a {
+        color: #ffffff;
+        text-decoration: none;
+        padding: 8px 15px;
+        border-radius: 5px;
+        font-weight: 500;
+        transition: background-color 0.3s;
+    }
+
+    nav a.active {
+        background-color: #ffffff;
+        color: #0056b3;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    /* 3. Form and Button Styling */
+    .app-form {
+        display: flex;
+        flex-direction: column;
+    }
+
+    label {
+        margin-top: 20px;
+        margin-bottom: 5px;
+        font-weight: 600;
+        color: #34495e;
+    }
+
+    input[type="text"], input[type="email"], input[type="number"], select {
+        padding: 12px;
+        border: 1px solid #cce0f0;
+        border-radius: 6px;
+        font-size: 16px;
+        background-color: #f7f9fb;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    button[type="submit"] {
+        background-color: #d9534f; /* Accent Red */
+        color: white;
+        padding: 15px 20px;
+        margin-top: 35px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        transition: background-color 0.3s ease;
+    }
+
+    button[type="submit"]:hover:not(:disabled) {
+        background-color: #c9302c;
+        transform: translateY(-1px);
+    }
+    
+    button[type="submit"]:disabled {
+        background-color: #aaa;
+        cursor: not-allowed;
+    }
+
+    /* 4. Confirmation Modal */
+    #confirmationModal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.4);
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal-content {
+        background-color: #28a745; /* Green for Success */
+        color: white;
+        padding: 40px 60px;
+        border-radius: 10px;
+        text-align: center;
+        font-size: 1.8em;
+        font-weight: 700;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* 5. Contact/Summary Page Styles */
+    #summary-box {
+        background-color: #f0f7ff;
+        border: 1px solid #b3cde6;
+        padding: 25px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+        line-height: 2;
+        color: #34495e;
+    }
+
+    .summary-label {
+        font-weight: 700;
+        color: #0056b3; /* Primary blue for labels */
+    }
+
+    .contact-details h2, .page-content h2 {
+        color: #34495e;
+        border-bottom: 2px solid #e0e0e0;
+        padding-bottom: 10px;
+        margin-top: 40px;
+        font-weight: 600;
+    }
+    
+    .contact-details b {
+        color: #0056b3;
+        font-size: 1.1em;
+    }
+    
+    /* 6. Rating Component Styling */
+    .rating-container {
+        display: flex;
+        justify-content: center;
+        flex-direction: row-reverse;
+        gap: 10px;
+        margin-top: 20px;
+        margin-bottom: 10px;
+    }
+    .rating-container input { display: none; }
+    .rating-container label {
+        color: #ccc;
+        font-size: 2.5em;
+        cursor: pointer;
+        transition: color 0.3s;
+        margin: 0;
+    }
+    .rating-container input:checked ~ label,
+    .rating-container label:hover,
+    .rating-container label:hover ~ label {
+        color: #ffc107;
+    }
+
+    /* Helper text style */
+    .hint {
+        font-size: 0.9em;
+        color: #666;
+        margin-top: 6px;
+    }
+
+    /* Mobile adjustments */
+    @media (max-width: 650px) {
+        .container {
+            margin: 30px 15px;
+            padding: 20px;
+        }
+        nav { gap: 10px; }
+        nav a { font-size: 12px; padding: 6px 8px; }
+    }
+  </style>
+</head>
+<body onload="renderPage('home');">
+  
+  <header>
+    <nav id="main-nav">
+      <a href="#" onclick="renderPage('home')" id="nav-home">Home</a>
+      <a href="#" onclick="renderPage('about')" id="nav-about">About</a>
+      <a href="#" onclick="renderPage('register')" id="nav-register">Register</a>
+      <a href="#" onclick="renderPage('event')" id="nav-event">Select Event</a>
+      <a href="#" onclick="renderPage('venue')" id="nav-venue">Select Venue</a>
+      <a href="#" onclick="renderPage('price')" id="nav-price">Select Price</a>
+      <a href="#" onclick="renderPage('contact')" id="nav-contact">Contact</a>
+    </nav>
+  </header>
+
+  <div id="app-container" class="container">
+    <!-- Content is rendered here by JavaScript -->
+  </div>
+  
+  <!-- Confirmation Modal Structure -->
+  <div id="confirmationModal">
+      <div class="modal-content">
+          <p id="modalMessage">Registration Confirmed! 🎉</p>
+      </div>
+  </div>
+
+  <script>
+    // --- Data Storage and Initialization ---
+    let userData = JSON.parse(localStorage.getItem('registrationData')) || {};
+    function saveUserData() {
+        localStorage.setItem("registrationData", JSON.stringify(userData));
+    }
+
+    // --- Jaipur Venue Catalog (5 areas with tiered pricing by guest count) ---
+    // Pricing is per venue and scales by guest tiers + service level multiplier
+    const venueCatalog = {
+      "C-Scheme Banquet, C-Scheme": { tiers: [
+          { max: 100,  price: 120000 },
+          { max: 300,  price: 250000 },
+          { max: 600,  price: 450000 },
+          { max: Infinity, price: 800000 }
+      ]},
+      "Heritage Hall, Amer Road": { tiers: [
+          { max: 100,  price: 110000 },
+          { max: 300,  price: 230000 },
+          { max: 600,  price: 420000 },
+          { max: Infinity, price: 750000 }
+      ]},
+      "Galaxy Lawn, Malviya Nagar": { tiers: [
+          { max: 100,  price: 90000 },
+          { max: 300,  price: 200000 },
+          { max: 600,  price: 380000 },
+          { max: Infinity, price: 700000 }
+      ]},
+      "Sunrise Palace, Mansarovar": { tiers: [
+          { max: 100,  price: 70000 },
+          { max: 300,  price: 160000 },
+          { max: 600,  price: 320000 },
+          { max: Infinity, price: 600000 }
+      ]},
+      "Royal Courts, Vaishali Nagar": { tiers: [
+          { max: 100,  price: 80000 },
+          { max: 300,  price: 180000 },
+          { max: 600,  price: 350000 },
+          { max: Infinity, price: 650000 }
+      ]}
+    };
+
+    const serviceLevels = {
+      "Economy": 1.00,   // bare essentials
+      "Standard": 1.15,  // + basic decor, sound
+      "Premium": 1.30    // + premium decor, lighting, coordination
+    };
+
+    function formatINR(n) {
+      return Number(n).toLocaleString('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0 });
+    }
+
+    function computeVenuePrice(venueName, guests, level) {
+      const venue = venueCatalog[venueName];
+      if (!venue) return null;
+      const tier = venue.tiers.find(t => guests <= t.max) || venue.tiers.at(-1);
+      const multiplier = serviceLevels[level] || 1;
+      return Math.round(tier.price * multiplier);
+    }
+
+    // --- Page Templates ---
+    const pageTemplates = {
+      home: `
+        <div class="page-content">
+          <h1>Welcome to the Event Management Hub 🎉</h1>
+          <p style="text-align: center; margin-bottom: 40px; color: #555;">
+            Your one-stop solution for planning and registering for the perfect event. Start your journey below!
+          </p>
+          <a href="#" onclick="renderPage('register')" style="display: block; text-align: center; background-color: #d9534f; color: white; padding: 15px 20px; margin-top: 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 18px; font-weight: 700; letter-spacing: 1px; text-decoration: none; transition: background-color 0.3s ease;">
+            Start Registration Now
+          </a>
+        </div>
+      `,
+      about: `
+        <div class="page-content">
+          <h1>About Our Event Services 🌟</h1>
+          <p>We specialize in making your special moments unforgettable. Our flexible packages are designed to suit every need and budget.</p>
+          <a href="#" onclick="renderPage('register')" style="display: block; text-align: center; background-color: #0056b3; color: white; padding: 15px 20px; margin-top: 40px; border: none; border-radius: 8px; cursor: pointer; font-size: 18px; font-weight: 700; letter-spacing: 1px; text-decoration: none; transition: background-color 0.3s ease;">
+            Register for Your Event
+          </a>
+        </div>
+      `,
+      register: `
+        <h1>Event Registration Form</h1>
+        <form id="registrationForm" class="app-form">
+          <label>Full Name:</label>
+          <input type="text" id="name" required value="${userData.name || ''}">
+          <label>Email:</label>
+          <input type="email" id="email" required value="${userData.email || ''}">
+          <label>Phone Number:</label>
+          <input type="text" id="phone" required value="${userData.phone || ''}">
+          <button type="submit">Register</button>
+        </form>
+      `,
+      event: `
+        <h1>Choose Your Event</h1>
+        <form id="eventForm" class="app-form">
+          <label>Select Event:</label>
+          <select id="eventType" required>
+            <option value="">--Select Event--</option>
+            <option value="Haldi" ${userData.selectedEvent === 'Haldi' ? 'selected' : ''}>Haldi</option>
+            <option value="Sangeet" ${userData.selectedEvent === 'Sangeet' ? 'selected' : ''}>Sangeet</option>
+            <option value="Hackathon" ${userData.selectedEvent === 'Hackathon' ? 'selected' : ''}>Hackathon</option>
+            <option value="Freshers party" ${userData.selectedEvent === 'Freshers party' ? 'selected' : ''}>Freshers party</option>
+            <option value="Party" ${userData.selectedEvent === 'Party' ? 'selected' : ''}>Party</option>
+            <option value="Garba Night" ${userData.selectedEvent === 'Garba Night' ? 'selected' : ''}>Garba Night</option>
+            <option value="Varmala" ${userData.selectedEvent === 'Varmala' ? 'selected' : ''}>Varmala</option>
+            <option value="Other" ${userData.selectedEvent === 'Other' ? 'selected' : ''}>Other</option>
+          </select>
+          <button type="submit">Next</button>
+        </form>
+      `,
+      /* NEW: Venue page (Jaipur, 5 areas, price by people & budget) */
+      venue: `
+        <h1>Select Venue (Jaipur)</h1>
+        <form id="venueForm" class="app-form">
+          <label>Choose Area/Venue:</label>
+          <select id="venueName" required>
+            <option value="">--Select Venue--</option>
+            ${Object.keys(venueCatalog).map(v => `
+                <option value="${v}" ${userData.selectedVenue === v ? 'selected' : ''}>${v}</option>
+            `).join('')}
+          </select>
+
+          <label>Number of People:</label>
+          <input type="number" id="guestCount" min="1" step="1" placeholder="e.g., 150" required value="${userData.guestCount || ''}">
+          <div class="hint">Pricing auto-adjusts by guest tiers: ≤100, ≤300, ≤600, 600+.</div>
+
+          <label>Service Level (fits your budget):</label>
+          <select id="serviceLevel" required>
+            ${Object.keys(serviceLevels).map(level => `
+              <option value="${level}" ${userData.serviceLevel === level ? 'selected' : ''}>${level}</option>
+            `).join('')}
+          </select>
+
+          <div id="venuePricePreview" class="hint" style="margin-top:12px;">
+            ${userData.calculatedPrice ? `Estimated Price: <b>${formatINR(userData.calculatedPrice)}</b>` : 'Estimated Price will appear here.'}
+          </div>
+
+          <button type="submit">Next</button>
+        </form>
+      `,
+      price: `
+        <h1>Select Event Price</h1>
+        <form id="priceForm" class="app-form">
+          <label>Choose Package:</label>
+          <select id="eventPrice" required>
+            <option value="">--Select Price--</option>
+            <option value="10000" ${userData.selectedPrice === '10000' ? 'selected' : ''}>₹10,000 (Small gathering)</option>
+            <option value="50000" ${userData.selectedPrice === '50000' ? 'selected' : ''}>₹50,000 (Basic package)</option>
+            <option value="100000" ${userData.selectedPrice === '100000' ? 'selected' : ''}>₹1,00,000 (Medium event)</option>
+            <option value="150000" ${userData.selectedPrice === '150000' ? 'selected' : ''}>₹1,50,000 (Premium package)</option>
+            <option value="1000000" ${userData.selectedPrice === '1000000' ? 'selected' : ''}>₹10,00,000 (Grand event)</option>
+          </select>
+          ${userData.calculatedPrice ? `
+            <div class="hint" style="margin-top:10px;">
+              Suggested by your venue selection: <b>${formatINR(userData.calculatedPrice)}</b>
+            </div>` : ''
+          }
+          <button type="submit">Finish</button>
+        </form>
+      `,
+      contact: `
+        <h1>Thank You for Registering 🎊</h1>
+        <p id="summary-box" style="margin-bottom: 40px;"></p>
+        
+        <h2 style="color: #34495e; margin-top: 40px; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px; font-weight: 600;">Rate Your Experience</h2>
+        <p style="text-align: center; color: #555;">How would you rate the ease of the registration process?</p>
+        
+        <form id="ratingForm" class="app-form" style="margin-bottom: 40px;">
+            <div class="rating-container">
+                <input type="radio" id="star5" name="eventRating" value="5" ${userData.eventRating == 5 ? 'checked' : ''}><label for="star5">★</label>
+                <input type="radio" id="star4" name="eventRating" value="4" ${userData.eventRating == 4 ? 'checked' : ''}><label for="star4">★</label>
+                <input type="radio" id="star3" name="eventRating" value="3" ${userData.eventRating == 3 ? 'checked' : ''}><label for="star3">★</label>
+                <input type="radio" id="star2" name="eventRating" value="2" ${userData.eventRating == 2 ? 'checked' : ''}><label for="star2">★</label>
+                <input type="radio" id="star1" name="eventRating" value="1" ${userData.eventRating == 1 ? 'checked' : ''}><label for="star1">★</label>
+            </div>
+            <button type="submit" id="ratingSubmitButton" style="margin-top: 20px;">Submit Rating</button>
+        </form>
+
+        <div class="contact-details">
+            <h2 style="color: #34495e; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px; margin-top: 40px; font-weight: 600;">Contact Us</h2>
+            <p>Email: <b style="color: #0056b3; font-size: 1.1em;">vanshsharma0317@gmail.com</b></p>
+            <p>Phone: <b style="color: #0056b3; font-size: 1.1em;">9216871043</b></p>
+        </div>
+      `
+    };
+
+    // --- Core Rendering and Navigation Logic ---
+    function updateNav(page) {
+      document.querySelectorAll('#main-nav a').forEach(a => a.classList.remove('active'));
+      const activeLink = document.getElementById('nav-' + page);
+      if (activeLink) activeLink.classList.add('active');
+    }
+
+    function renderPage(page) {
+      const container = document.getElementById('app-container');
+      container.innerHTML = pageTemplates[page];
+      updateNav(page);
+      
+      // Attach form listeners for the current page
+      switch (page) {
+        case 'register': attachRegisterListener(); break;
+        case 'event': attachEventListener(); break;
+        case 'venue': attachVenueListener(); break;
+        case 'price': attachPriceListener(); break;
+        case 'contact': displaySummary(); break;
+      }
+    }
+
+    // --- Utility Functions ---
+    function showConfirmationModal() {
+      const modal = document.getElementById('confirmationModal');
+      modal.style.display = 'flex'; 
+      setTimeout(() => {
+          modal.style.display = 'none';
+          renderPage('contact');
+      }, 2500);
+    }
+    
+    function sendEmailNotification() {
+      console.log("--- Email Notification Simulated ---");
+      console.log("To activate this, integrate a service like EmailJS.");
+      console.log("Registration Data:", userData);
+    }
+
+    // --- Form Submission Handlers ---
+    function attachRegisterListener() {
+      document.getElementById("registrationForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+        userData.name  = document.getElementById("name").value.trim();
+        userData.email = document.getElementById("email").value.trim();
+        userData.phone = document.getElementById("phone").value.trim();
+        if (!userData.name || !userData.email || !userData.phone) return;
+        saveUserData();
+        renderPage('event');
+      });
+    }
+
+    function attachEventListener() {
+      document.getElementById("eventForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+        const selectedEvent = document.getElementById("eventType").value;
+        if (!selectedEvent) return;
+        userData.selectedEvent = selectedEvent;
+        saveUserData();
+        renderPage('venue'); // Go to new Venue step
+      });
+    }
+
+    function attachVenueListener() {
+      const venueSelect = document.getElementById("venueName");
+      const guestInput  = document.getElementById("guestCount");
+      const levelSelect = document.getElementById("serviceLevel");
+      const preview     = document.getElementById("venuePricePreview");
+
+      function updatePreview() {
+        const v = venueSelect.value;
+        const g = parseInt(guestInput.value, 10);
+        const l = levelSelect.value;
+        if (v && g > 0 && l) {
+          const p = computeVenuePrice(v, g, l);
+          preview.innerHTML = p ? `Estimated Price: <b>${formatINR(p)}</b>` : 'Estimated Price will appear here.';
+        } else {
+          preview.textContent = 'Estimated Price will appear here.';
+        }
+      }
+
+      venueSelect.addEventListener('change', updatePreview);
+      guestInput.addEventListener('input', updatePreview);
+      levelSelect.addEventListener('change', updatePreview);
+      updatePreview();
+
+      document.getElementById("venueForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+        const venue = venueSelect.value;
+        const guests = parseInt(guestInput.value, 10);
+        const level = levelSelect.value;
+        if (!venue || !(guests > 0) || !level) return;
+
+        const price = computeVenuePrice(venue, guests, level);
+
+        userData.selectedVenue   = venue;
+        userData.guestCount      = guests;
+        userData.serviceLevel    = level;
+        userData.calculatedPrice = price;
+
+        // Pre-select suggested price for next page; user can still change it
+        if (price) userData.selectedPrice = String(price);
+
+        saveUserData();
+        renderPage('price');
+      });
+    }
+
+    function attachPriceListener() {
+      document.getElementById("priceForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+        const selectedPrice = document.getElementById("eventPrice").value;
+        if (!selectedPrice) return;
+        userData.selectedPrice = selectedPrice;
+        saveUserData();
+        sendEmailNotification();
+        showConfirmationModal();
+      });
+    }
+
+    // --- Contact/Rating Logic ---
+    function handleRatingSubmission(e) {
+      e.preventDefault();
+      const selectedRatingElement = document.querySelector('input[name="eventRating"]:checked');
+      const submitButton = document.getElementById("ratingSubmitButton");
+      if (!selectedRatingElement) return;
+
+      userData.eventRating = selectedRatingElement.value;
+      saveUserData();
+      
+      submitButton.textContent = "Rating Submitted! Thank You.";
+      submitButton.style.backgroundColor = '#28a745';
+      submitButton.disabled = true;
+      document.querySelectorAll('input[name="eventRating"]').forEach(radio => radio.disabled = true);
+
+      displaySummary(true);
+    }
+
+    function displaySummary(isRatingUpdate = false) {
+      const summaryBox = document.getElementById("summary-box");
+      if (!summaryBox) return;
+
+      const price = userData.selectedPrice;
+      const formattedPrice = price ?
+        parseInt(price).toLocaleString('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0 }) :
+        "Not selected";
+
+      const ratingText = userData.eventRating
+        ? `${userData.eventRating} / 5 stars`
+        : "Not yet rated";
+
+      summaryBox.innerHTML = `
+        <span class="summary-label">Name:</span> ${userData.name || "Not provided"} <br>
+        <span class="summary-label">Email:</span> ${userData.email || "Not provided"} <br>
+        <span class="summary-label">Phone:</span> ${userData.phone || "Not provided"} <br>
+        <span class="summary-label">Selected Event:</span> ${userData.selectedEvent || "Not selected"} <br>
+        <span class="summary-label">Venue (Jaipur):</span> ${userData.selectedVenue || "Not selected"} <br>
+        <span class="summary-label">Guests:</span> ${userData.guestCount || "Not specified"} <br>
+        <span class="summary-label">Service Level:</span> ${userData.serviceLevel || "Not selected"} <br>
+        <span class="summary-label">Event Package:</span> ${formattedPrice} <br>
+        <span class="summary-label">Service Rating:</span> ${ratingText}
+      `;
+      
+      if (!isRatingUpdate) {
+        const ratingForm = document.getElementById("ratingForm");
+        if (ratingForm) {
+          ratingForm.addEventListener("submit", handleRatingSubmission);
+          if (userData.eventRating) {
+            const submitButton = document.getElementById("ratingSubmitButton");
+            submitButton.textContent = "Rating Submitted! Thank You.";
+            submitButton.style.backgroundColor = '#28a745';
+            submitButton.disabled = true;
+            document.querySelectorAll('input[name="eventRating"]').forEach(radio => radio.disabled = true);
+          }
+        }
+      }
+    }
+  </script> 
+</body>
+</html>
